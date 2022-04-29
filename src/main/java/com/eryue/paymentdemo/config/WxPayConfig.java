@@ -105,7 +105,7 @@ public class WxPayConfig {
      * 获取签名验证器
      * @return
      */
-    @Bean
+    @Bean(name = "Verifier")
     public ScheduledUpdateCertificatesVerifier getVerifier(){
 
         log.info("获取签名验证器");
