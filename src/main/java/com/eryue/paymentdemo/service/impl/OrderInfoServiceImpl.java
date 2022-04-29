@@ -29,7 +29,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         //查询是否存在未支付的订单
         OrderInfo orderInfo = this.getNoPayOrderByProductId(productId);
         if (orderInfo != null) {
-            return orderInfo;
+            baseMapper.deleteById(productId);
+            // return orderInfo;
         }
         //查询商品信息
         Product product = productMapper.selectById(productId);
@@ -40,6 +41,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setTitle(product.getTitle());
         orderInfo.setOrderStatus(OrderStatus.NOTPAY.getType());
         orderInfo.setTotalFee(product.getPrice());
+        orderInfo.setIsDeleted(0);
         baseMapper.insert(orderInfo);
         return orderInfo;
     }
