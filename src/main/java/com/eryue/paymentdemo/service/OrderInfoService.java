@@ -15,4 +15,6 @@ public interface OrderInfoService extends IService<OrderInfo> {
     List<OrderInfo> getOrderListByCreateTime();
 
     void updateStatusByOrderNo(String orderNo, OrderStatus success);
+
+    String getOrderStatus(String orderNo);
 }

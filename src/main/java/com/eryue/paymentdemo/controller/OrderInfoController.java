@@ -1,16 +1,14 @@
 package com.eryue.paymentdemo.controller;
 
 import com.eryue.paymentdemo.entity.OrderInfo;
+import com.eryue.paymentdemo.enums.OrderStatus;
 import com.eryue.paymentdemo.service.OrderInfoService;
 import com.eryue.paymentdemo.vo.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,4 +30,15 @@ public class OrderInfoController {
         List<OrderInfo> orderListByCreateTime = orderInfoService.getOrderListByCreateTime();
         return Result.ok().data("orderList",orderListByCreateTime);
     }
+
+    @ApiOperation("订单列表")
+    @GetMapping("/query-order-status/{orderNo}")
+    public Result queryOrderStatus(@PathVariable String orderNo){
+        String orderStatus = orderInfoService.getOrderStatus(orderNo);
+        if (OrderStatus.SUCCESS.getType().equals(orderStatus)){
+            return Result.ok();
+        }
+        return Result.ok().setCode(101).setMessage("支付中...");
+    }
+
 }

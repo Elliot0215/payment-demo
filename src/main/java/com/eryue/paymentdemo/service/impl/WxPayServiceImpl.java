@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author 二月
@@ -44,6 +45,8 @@ public class WxPayServiceImpl implements WxPayService {
 
     @Autowired
     private OrderInfoService orderInfoService;
+
+    private final ReentrantLock lock = new ReentrantLock();
 
     @Qualifier("wxPayClient")
     @Resource
@@ -116,10 +119,22 @@ public class WxPayServiceImpl implements WxPayService {
         Gson gson = new Gson();
         Map<String, Object> plainTextMap = gson.fromJson(plainText, HashMap.class);
         String orderNo = (String) plainTextMap.get("out_trade_no");
-        // 更新订单状态
-        orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.SUCCESS);
-        // 记录支付日志
-        paymentInfoService.createPaymentInfo(plainText);
+
+        if (lock.tryLock()){
+            try {
+                String orderStatus = orderInfoService.getOrderStatus(orderNo);
+                if (!OrderStatus.NOTPAY.getType().equals(orderStatus)) {
+                    return;
+                }
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.SUCCESS);
+                // 记录支付日志
+                paymentInfoService.createPaymentInfo(plainText);
+            }finally {
+                lock.unlock();
+            }
+
+        }
     }
 
     /**

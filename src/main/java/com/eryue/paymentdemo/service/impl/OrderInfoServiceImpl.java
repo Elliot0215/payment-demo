@@ -51,7 +51,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void saveCodeUrl(String orderNo, String codeUrl) {
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setCodeUrl(codeUrl);
@@ -65,6 +65,11 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 .orderByDesc(OrderInfo::getCreateTime));
     }
 
+    /**
+     * 更新订单状态
+     * @param orderNo
+     * @param orderStatus
+     */
     @Override
     @Transactional(rollbackFor=Exception.class)
     public void updateStatusByOrderNo(String orderNo, OrderStatus orderStatus) {
@@ -73,6 +78,22 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setOrderStatus(orderStatus.getType());
         baseMapper.update(orderInfo, new LambdaQueryWrapper<OrderInfo>()
                 .eq(OrderInfo::getOrderNo,orderNo));
+    }
+
+    /**
+     * 根据订单号获取订单状态
+     * @param orderNo
+     * @return
+     */
+    @Override
+    public String getOrderStatus(String orderNo) {
+        OrderInfo orderInfo = baseMapper.selectOne(new LambdaQueryWrapper<OrderInfo>()
+                .eq(OrderInfo::getOrderNo, orderNo));
+
+        if (orderInfo == null) {
+            return null;
+        }
+        return orderInfo.getOrderStatus();
     }
 
     private OrderInfo getNoPayOrderByProductId(Long productId) {
