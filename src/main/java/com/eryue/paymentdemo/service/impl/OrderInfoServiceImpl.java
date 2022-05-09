@@ -6,6 +6,7 @@ import com.eryue.paymentdemo.entity.OrderInfo;
 import com.eryue.paymentdemo.entity.Product;
 import com.eryue.paymentdemo.enums.OrderStatus;
 import com.eryue.paymentdemo.enums.wxpay.WxApiType;
+import com.eryue.paymentdemo.exception.BuessExcetion;
 import com.eryue.paymentdemo.mapper.OrderInfoMapper;
 import com.eryue.paymentdemo.mapper.ProductMapper;
 import com.eryue.paymentdemo.service.OrderInfoService;
@@ -40,20 +41,20 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         //查询商品信息
         Product product = productMapper.selectById(productId);
-        // OrderInfo orderInfo = new OrderInfo();
+        OrderInfo orderInfoTemp = new OrderInfo();
         Optional.ofNullable(product)
                 .map(p->{
-                    orderInfo.setProductId(productId);
-                    orderInfo.setOrderNo(OrderNoUtils.getOrderNo());
-                    orderInfo.setTitle(p.getTitle());
-                    orderInfo.setOrderStatus(OrderStatus.NOTPAY.getType());
-                    orderInfo.setTotalFee(p.getPrice());
-                    orderInfo.setIsDeleted(0);
-                    baseMapper.insert(orderInfo);
-                    return orderInfo;
+                    orderInfoTemp.setProductId(productId);
+                    orderInfoTemp.setOrderNo(OrderNoUtils.getOrderNo());
+                    orderInfoTemp.setTitle(p.getTitle());
+                    orderInfoTemp.setOrderStatus(OrderStatus.NOTPAY.getType());
+                    orderInfoTemp.setTotalFee(p.getPrice());
+                    orderInfoTemp.setIsDeleted(0);
+                    baseMapper.insert(orderInfoTemp);
+                    return orderInfoTemp;
                 })
-                .orElseThrow(()->new Exception("用户不存在"));
-        return orderInfo;
+                .orElseThrow(()->new BuessExcetion("商品不存在"));
+        return orderInfoTemp;
     }
 
     @Override
@@ -103,8 +104,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     private OrderInfo getNoPayOrderByProductId(Long productId) {
-        if (productId == null) {
-            throw new RuntimeException("订单id为空");
+        if (productId == null || productId == 0) {
+            throw new BuessExcetion("订单id为空");
         }
 
         OrderInfo orderInfo = baseMapper.selectOne(new LambdaQueryWrapper<OrderInfo>()
