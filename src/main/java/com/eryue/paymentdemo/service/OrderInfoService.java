@@ -10,7 +10,7 @@ import java.util.List;
  * @author 二月
  */
 public interface OrderInfoService extends IService<OrderInfo> {
-    OrderInfo createOrderByProductId(Long productId);
+    OrderInfo createOrderByProductId(Long productId) throws Exception;
     void saveCodeUrl(String orderNo, String codeUrl);
     List<OrderInfo> getOrderListByCreateTime();
 

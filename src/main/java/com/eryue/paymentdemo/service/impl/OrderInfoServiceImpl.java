@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 二月
@@ -29,24 +30,29 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Override
     @Transactional
-    public OrderInfo createOrderByProductId(Long productId) {
+    public OrderInfo createOrderByProductId(Long productId) throws Exception {
         //查询是否存在未支付的订单
         OrderInfo orderInfo = this.getNoPayOrderByProductId(productId);
         if (orderInfo != null) {
-            baseMapper.deleteById(productId);
+            baseMapper.delete(new LambdaQueryWrapper<OrderInfo>()
+                    .eq(OrderInfo::getProductId,productId));
             // return orderInfo;
         }
         //查询商品信息
         Product product = productMapper.selectById(productId);
-
-        orderInfo = new OrderInfo();
-        orderInfo.setProductId(productId);
-        orderInfo.setOrderNo(OrderNoUtils.getOrderNo());
-        orderInfo.setTitle(product.getTitle());
-        orderInfo.setOrderStatus(OrderStatus.NOTPAY.getType());
-        orderInfo.setTotalFee(product.getPrice());
-        orderInfo.setIsDeleted(0);
-        baseMapper.insert(orderInfo);
+        // OrderInfo orderInfo = new OrderInfo();
+        Optional.ofNullable(product)
+                .map(p->{
+                    orderInfo.setProductId(productId);
+                    orderInfo.setOrderNo(OrderNoUtils.getOrderNo());
+                    orderInfo.setTitle(p.getTitle());
+                    orderInfo.setOrderStatus(OrderStatus.NOTPAY.getType());
+                    orderInfo.setTotalFee(p.getPrice());
+                    orderInfo.setIsDeleted(0);
+                    baseMapper.insert(orderInfo);
+                    return orderInfo;
+                })
+                .orElseThrow(()->new Exception("用户不存在"));
         return orderInfo;
     }
 

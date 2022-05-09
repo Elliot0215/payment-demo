@@ -31,7 +31,7 @@ public class OrderInfoController {
         return Result.ok().data("orderList",orderListByCreateTime);
     }
 
-    @ApiOperation("订单列表")
+    @ApiOperation("查询本地订单状态")
     @GetMapping("/query-order-status/{orderNo}")
     public Result queryOrderStatus(@PathVariable String orderNo){
         String orderStatus = orderInfoService.getOrderStatus(orderNo);
