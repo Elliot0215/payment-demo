@@ -1,5 +1,6 @@
 package com.eryue.paymentdemo.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,10 +12,11 @@ import java.util.Map;
  */
 @Data
 @Accessors(chain = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Result {
     private Integer code;
     private String message;
-    private Map<String, Object> data = new HashMap<>();
+    private Map<String, Object> data;
 
     public static Result ok() {
         Result r = new Result();
